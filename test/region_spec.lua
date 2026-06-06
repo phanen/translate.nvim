@@ -65,4 +65,39 @@ describe('translate.region', function()
     end)
     h.eq(true, ok)
   end)
+
+  it('uses config.api = microsoft when set', function()
+    h.set_lines({ 'hello' })
+    local url = h.exec_lua(function()
+      require('translate').setup({ api = 'microsoft' })
+      require('translate.http').set_transport(function(opts, cb)
+        _G._test_url = opts.url
+        cb(
+          200,
+          vim.json.encode({
+            { translations = { { text = '你好' } }, detectedLanguage = { language = 'en' } },
+          })
+        )
+      end)
+      vim.api.nvim_win_set_cursor(0, { 1, 0 })
+      require('translate').region()
+      return _G._test_url
+    end)
+    h.matches('api%-edge%.cognitive%.microsofttranslator%.com', url)
+  end)
+
+  it('uses config.api = openai when set', function()
+    h.set_lines({ 'hello' })
+    local url = h.exec_lua(function()
+      require('translate').setup({ api = 'openai' })
+      require('translate.http').set_transport(function(opts, cb)
+        _G._test_url = opts.url
+        cb(200, vim.json.encode({ choices = { { message = { content = '你好' } } } }))
+      end)
+      vim.api.nvim_win_set_cursor(0, { 1, 0 })
+      require('translate').region()
+      return _G._test_url
+    end)
+    h.matches('api%.openai%.com', url)
+  end)
 end)

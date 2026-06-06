@@ -11,12 +11,19 @@
 ---@field source_lang string
 ---@field target translate.Target
 ---@field http_timeout integer
+---@field api translate.ApiType?  -- backend; default 'google'
 
 local M = {}
 
 ---@return translate.Config
 M.defaults = function()
-  return { target_lang = 'zh-Hans', source_lang = 'auto', target = 'eol', http_timeout = 30000 }
+  return {
+    target_lang = 'zh-Hans',
+    source_lang = 'auto',
+    target = 'eol',
+    http_timeout = 30000,
+    api = 'google',
+  }
 end
 
 ---@param a translate.Config
@@ -51,6 +58,10 @@ M.validate = function(cfg)
     type(cfg.http_timeout) == 'number' and cfg.http_timeout > 0,
     'http_timeout must be a positive number'
   )
+  if cfg.api ~= nil then
+    local valid_apis = { google = true, microsoft = true, openai = true }
+    assert(valid_apis[cfg.api] == true, ('invalid api: %s'):format(tostring(cfg.api)))
+  end
 end
 
 return M

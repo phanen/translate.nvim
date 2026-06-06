@@ -56,7 +56,7 @@ M.resync = function(buf)
   if #new_texts > 0 then
     local t = require('translate')
     if t.config then
-      local api = require('translate.api').default_api('google')
+      local api = require('translate.api').default_api(t.config.api or 'google')
       api.from = t.config.source_lang
       api.to = t.config.target_lang
       api.httpTimeout = t.config.http_timeout

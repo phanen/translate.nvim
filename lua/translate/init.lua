@@ -37,7 +37,7 @@ M.region = function()
     lines = { source.cword() }
   end
 
-  local api_cfg = api.default_api('google')
+  local api_cfg = api.default_api(M.config.api or 'google')
   api_cfg.from = M.config.source_lang
   api_cfg.to = M.config.target_lang
   api_cfg.httpTimeout = M.config.http_timeout

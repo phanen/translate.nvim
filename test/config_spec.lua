@@ -11,6 +11,7 @@ describe('translate.config', function()
     h.eq('auto', d.source_lang)
     h.eq('eol', d.target)
     h.eq(30000, d.http_timeout)
+    h.eq('google', d.api)
   end)
 
   describe('merge', function()
@@ -51,5 +52,12 @@ describe('translate.config', function()
       'rejects empty target_lang',
       function() h.matches('target_lang', run({ target_lang = '' })) end
     )
+
+    it('accepts known api values', function()
+      h.eq('', run({ api = 'microsoft' }))
+      h.eq('', run({ api = 'openai' }))
+    end)
+
+    it('rejects unknown api', function() h.matches('invalid api', run({ api = 'deepl' })) end)
   end)
 end)
