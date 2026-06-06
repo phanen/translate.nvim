@@ -89,17 +89,12 @@ M.parseTransRes = function(res, api)
     end
     if res and res.type == 1 then
       local ok, parsed = pcall(vim.json.decode, res.result or '[]')
-      if
-        ok
-        and parsed
-        and parsed[1]
-        and parsed[1].mean
-        and parsed[1].mean[1]
-        and parsed[1].mean[1].cont
-      then
-        local key = next(parsed[1].mean[1].cont)
-        return { { tostring(key or ''), tostring(res.from or '') } }
+      local cont
+      if ok then
+        ---@cast parsed table
+        cont = vim.tbl_get(parsed, 1, 'mean', 1, 'cont')
       end
+      if cont then return { { tostring(next(cont) or ''), tostring(res.from or '') } } end
     elseif res and res.type == 2 and res.data and #res.data > 0 then
       local parts = {}
       for _, item in ipairs(res.data) do
