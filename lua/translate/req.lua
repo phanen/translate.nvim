@@ -33,8 +33,13 @@ M.genMicrosoft = function(api, text)
   end
   url = url .. '?' .. table.concat(q, '&')
   local headers = { ['Content-Type'] = 'application/json' }
-  if api.key then headers['Ocp-Apim-Subscription-Key'] = api.key end
-  if api.region then headers['Ocp-Apim-Subscription-Region'] = api.region end
+  if api.key then
+    headers['Ocp-Apim-Subscription-Key'] = api.key
+    if api.region then headers['Ocp-Apim-Subscription-Region'] = api.region end
+  else
+    local token = require('translate.ms_auth').fetch()
+    if token then headers['Authorization'] = 'Bearer ' .. token end
+  end
   local body = vim.json.encode({ { Text = text } })
   return url, { method = 'POST', headers = headers, body = body }, nil
 end
@@ -79,11 +84,32 @@ M.genMyMemory = function(api, text)
   return url, { method = 'GET', headers = {}, body = nil }, nil
 end
 
+---@param api translate.Api
+---@param text string
+---@return string url
+---@return table init
+---@return any _user_msg
+M.genBaidu = function(api, text)
+  local url = api.url or 'https://fanyi.baidu.com/transapi'
+  local from = (api.from and api.from ~= 'auto') and api.from or 'en'
+  local to = api.to or 'zh'
+  local body = 'from='
+    .. vim.uri_encode(from)
+    .. '&to='
+    .. vim.uri_encode(to)
+    .. '&query='
+    .. vim.uri_encode(text)
+    .. '&source=txt'
+  local headers = { ['Content-Type'] = 'application/x-www-form-urlencoded; charset=UTF-8' }
+  return url, { method = 'POST', headers = headers, body = body }, nil
+end
+
 M.genReqFuncs = {
   google = M.genGoogle,
   microsoft = M.genMicrosoft,
   openai = M.genOpenAI,
   mymemory = M.genMyMemory,
+  baidu = M.genBaidu,
 }
 
 return M

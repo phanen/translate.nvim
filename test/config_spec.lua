@@ -57,6 +57,7 @@ describe('translate.config', function()
       h.eq('', run({ api = 'microsoft' }))
       h.eq('', run({ api = 'openai' }))
       h.eq('', run({ api = 'mymemory' }))
+      h.eq('', run({ api = 'baidu' }))
     end)
 
     it('rejects unknown api', function() h.matches('invalid api', run({ api = 'deepl' })) end)

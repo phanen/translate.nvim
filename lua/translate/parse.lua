@@ -83,6 +83,22 @@ M.parseTransRes = function(res, api)
       )
     end
     return { { tostring(data.translatedText or ''), tostring(data.match or '') } }
+  elseif api.apiType == 'baidu' then
+    if res and res.type == 1 then
+      local ok, parsed = pcall(vim.json.decode, res.result or '{}')
+      if ok and parsed and parsed.content and parsed.content[1] then
+        local cont = parsed.content[1].mean[1].cont
+        local key = cont and (next(cont))
+        return { { tostring(key or ''), tostring(res.from or '') } }
+      end
+    elseif res and res.type == 2 and res.data then
+      local parts = {}
+      for _, item in ipairs(res.data) do
+        parts[#parts + 1] = tostring(item.dst or '')
+      end
+      return { { table.concat(parts, ' '), tostring(res.from or '') } }
+    end
+    return { { '', tostring((res or {}).from or '') } }
   elseif api.apiType == 'openai' then
     local content = type(res) == 'string' and res
       or (((res or {}).choices or {})[1] or {}).message and (((res or {}).choices[1].message or {}).content or '')

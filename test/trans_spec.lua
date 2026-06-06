@@ -69,7 +69,7 @@ describe('translate.trans', function()
     h.eq({ '你好' }, r)
   end)
 
-  it('chunks large input into multiple http calls', function()
+  it('chunks large input and replicates the chunk result per segment', function()
     local r = h.exec_lua(function()
       local count = { 0 }
       require('translate.http').set_transport(function(_, cb)
@@ -85,7 +85,7 @@ describe('translate.trans', function()
       return { out = out, calls = count[1] }
     end)
     h.eq(3, r.calls)
-    h.eq({ 'tr', 'tr', 'tr' }, r.out)
+    h.eq({ 'tr', 'tr', 'tr', 'tr', 'tr' }, r.out)
   end)
 
   it('throws on http error', function()

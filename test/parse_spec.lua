@@ -79,6 +79,36 @@ describe('translate.parse', function()
       h.matches('mymemory error 403', r.err)
       h.matches('INVALID LANGUAGE PAIR', r.err)
     end)
+
+    it('parses baidu type=2 (single sentence) response', function()
+      local r = h.exec_lua(
+        function()
+          return require('translate.parse').parseTransRes(
+            { type = 2, from = 'en', data = { { dst = '你好' }, { dst = '世界' } } },
+            { apiType = 'baidu' }
+          )
+        end
+      )
+      h.eq({ { '你好 世界', 'en' } }, r)
+    end)
+
+    it('parses baidu type=1 (dict) response', function()
+      local r = h.exec_lua(
+        function()
+          return require('translate.parse').parseTransRes(
+            {
+              type = 1,
+              from = 'en',
+              result = vim.json.encode({
+                content = { { mean = { { cont = { ['你好'] = 'hello' } } } } },
+              }),
+            },
+            { apiType = 'baidu' }
+          )
+        end
+      )
+      h.eq({ { '你好', 'en' } }, r)
+    end)
   end)
 
   describe('parseAIRes', function()

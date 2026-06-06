@@ -143,4 +143,21 @@ describe('translate.region', function()
     h.matches('api%.mymemory%.translated%.net', url)
     h.matches('langpair=en%%7czh%-Hans', url)
   end)
+
+  it('uses config.api = baidu when set (no key required)', function()
+    h.set_lines({ 'hello' })
+    local r = h.exec_lua(function()
+      require('translate').setup({ api = 'baidu' })
+      require('translate.http').set_transport(function(opts, cb)
+        _G._test_url = opts.url
+        _G._test_body = opts.body
+        cb(200, vim.json.encode({ type = 2, from = 'en', data = { { dst = '你好' } } }))
+      end)
+      vim.api.nvim_win_set_cursor(0, { 1, 0 })
+      require('translate').region()
+      return { url = _G._test_url, body = _G._test_body }
+    end)
+    h.matches('fanyi%.baidu%.com', r.url)
+    h.matches('query=hello', r.body)
+  end)
 end)

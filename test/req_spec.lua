@@ -90,11 +90,11 @@ describe('translate.req', function()
       h.eq('secret', init.headers['Ocp-Apim-Subscription-Key'])
     end)
 
-    it('adds region header when region is set', function()
+    it('adds region header when key + region are set', function()
       local _, init = h.exec_lua(
         function()
           return require('translate.req').genMicrosoft(
-            { apiType = 'microsoft', from = 'en', to = 'zh', region = 'eastasia' },
+            { apiType = 'microsoft', from = 'en', to = 'zh', key = 'k', region = 'eastasia' },
             'hi'
           )
         end
@@ -152,6 +152,26 @@ describe('translate.req', function()
         end
       )
       h.matches('de=me@x%.com', url)
+    end)
+  end)
+
+  describe('genBaidu', function()
+    it('builds a POST to fanyi.baidu.com with form-encoded body', function()
+      local url, init = h.exec_lua(
+        function()
+          return require('translate.req').genBaidu(
+            { apiType = 'baidu', from = 'en', to = 'zh' },
+            'hello world'
+          )
+        end
+      )
+      h.matches('fanyi%.baidu%.com', url)
+      h.eq('POST', init.method)
+      h.matches('from=en', init.body)
+      h.matches('to=zh', init.body)
+      h.matches('query=hello%%20world', init.body)
+      h.matches('source=txt', init.body)
+      h.eq('application/x-www-form-urlencoded; charset=UTF-8', init.headers['Content-Type'])
     end)
   end)
 

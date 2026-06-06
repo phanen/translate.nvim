@@ -13,9 +13,23 @@ M.handle = function(api, segments, opts)
   local req = require('translate.req')
   local http = require('translate.http')
   local parse = require('translate.parse')
+  local cache = require('translate.cache')
 
-  local chunks = batch.chunk(segments, opts)
-  local results = {}
+  local results, to_fetch, idx_map = {}, {}, {}
+  for i, s in ipairs(segments) do
+    local hit = cache.get(api.apiType, s, api.from or '', api.to or '')
+    if hit then
+      results[i] = hit
+    else
+      to_fetch[#to_fetch + 1] = s
+      idx_map[#idx_map + 1] = i
+    end
+  end
+
+  if #to_fetch == 0 then return results end
+
+  local chunks = batch.chunk(to_fetch, opts)
+  local pos = 0
   for _, chunk in ipairs(chunks) do
     local gen = req.genReqFuncs[api.apiType]
     assert(gen, ('unknown api type: %s'):format(api.apiType))
@@ -29,12 +43,18 @@ M.handle = function(api, segments, opts)
       timeout = api.httpTimeout,
     })
     if status < 200 or status >= 300 then error(('http error %d: %s'):format(status, body)) end
+    ---@cast body string
     local res = vim.json.decode(body)
     local parsed = parse.parseTransRes(res, api)
-    for _, p in ipairs(parsed) do
-      results[#results + 1] = p[1]
+    local translation = parsed[1] and parsed[1][1] or ''
+    for j, s in ipairs(chunk) do
+      local orig = idx_map[pos + j]
+      results[orig] = translation
+      cache.set(api.apiType, s, api.from or '', api.to or '', translation)
     end
+    pos = pos + #chunk
   end
+
   return results
 end
 

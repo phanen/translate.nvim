@@ -68,7 +68,8 @@ M.validate = function(cfg)
     'http_timeout must be a positive number'
   )
   if cfg.api ~= nil then
-    local valid_apis = { google = true, microsoft = true, openai = true, mymemory = true }
+    local valid_apis =
+      { google = true, microsoft = true, openai = true, mymemory = true, baidu = true }
     assert(valid_apis[cfg.api] == true, ('invalid api: %s'):format(tostring(cfg.api)))
   end
 end
