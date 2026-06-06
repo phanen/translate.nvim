@@ -84,21 +84,30 @@ M.parseTransRes = function(res, api)
     end
     return { { tostring(data.translatedText or ''), tostring(data.match or '') } }
   elseif api.apiType == 'baidu' then
+    if res and res.errno and res.errno ~= 0 then
+      error(('baidu error %s: %s'):format(tostring(res.errno), tostring(res.errmsg or '')))
+    end
     if res and res.type == 1 then
-      local ok, parsed = pcall(vim.json.decode, res.result or '{}')
-      if ok and parsed and parsed.content and parsed.content[1] then
-        local cont = parsed.content[1].mean[1].cont
-        local key = cont and (next(cont))
+      local ok, parsed = pcall(vim.json.decode, res.result or '[]')
+      if
+        ok
+        and parsed
+        and parsed[1]
+        and parsed[1].mean
+        and parsed[1].mean[1]
+        and parsed[1].mean[1].cont
+      then
+        local key = next(parsed[1].mean[1].cont)
         return { { tostring(key or ''), tostring(res.from or '') } }
       end
-    elseif res and res.type == 2 and res.data then
+    elseif res and res.type == 2 and res.data and #res.data > 0 then
       local parts = {}
       for _, item in ipairs(res.data) do
         parts[#parts + 1] = tostring(item.dst or '')
       end
       return { { table.concat(parts, ' '), tostring(res.from or '') } }
     end
-    return { { '', tostring((res or {}).from or '') } }
+    error(('baidu: empty or unknown response shape: %s'):format(vim.inspect(res or {})))
   elseif api.apiType == 'openai' then
     local content = type(res) == 'string' and res
       or (((res or {}).choices or {})[1] or {}).message and (((res or {}).choices[1].message or {}).content or '')

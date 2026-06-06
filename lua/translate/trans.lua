@@ -55,7 +55,9 @@ M.handle = function(api, segments, opts)
     for j, s in ipairs(chunk) do
       local orig = idx_map[pos + j]
       results[orig] = translation
-      cache.set(api.apiType, s, api.from or '', api.to or '', translation)
+      if translation ~= '' then
+        cache.set(api.apiType, s, api.from or '', api.to or '', translation)
+      end
     end
     pos = pos + #chunk
   end
