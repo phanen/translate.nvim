@@ -26,7 +26,8 @@ end
 ---@return any _user_msg
 M.genMicrosoft = function(api, text)
   local url = api.url or 'https://api-edge.cognitive.microsofttranslator.com/translate'
-  local params = { from = api.from, to = api.to, ['api-version'] = '3.0' }
+  local params = { to = api.to, ['api-version'] = '3.0' }
+  if api.from and api.from ~= 'auto' then params.from = api.from end
   local q = {}
   for k, v in pairs(params) do
     q[#q + 1] = ('%s=%s'):format(k, vim.uri_encode(tostring(v)))

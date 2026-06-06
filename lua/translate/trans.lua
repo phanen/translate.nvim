@@ -44,7 +44,12 @@ M.handle = function(api, segments, opts)
     })
     if status < 200 or status >= 300 then error(('http error %d: %s'):format(status, body)) end
     ---@cast body string
-    local res = vim.json.decode(body)
+    local ok, res = pcall(vim.json.decode, body)
+    if not ok then
+      local preview = body:sub(1, 200)
+      error(('non-json response from %s: %s'):format(api.apiType, preview))
+    end
+    ---@cast res table
     local parsed = parse.parseTransRes(res, api)
     local translation = parsed[1] and parsed[1][1] or ''
     for j, s in ipairs(chunk) do

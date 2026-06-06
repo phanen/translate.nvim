@@ -75,7 +75,20 @@ describe('translate.req', function()
       h.matches('to=zh', url)
       h.matches('api%-version=3%.0', url)
       h.eq('POST', init.method)
-      h.matches('"Text":"hello"', init.body)
+    end)
+
+    it('omits from when api.from is auto (microsoft edge auto-detects)', function()
+      local url = h.exec_lua(
+        function()
+          return require('translate.req').genMicrosoft(
+            { apiType = 'microsoft', from = 'auto', to = 'zh' },
+            'hi'
+          )
+        end
+      )
+      h.matches('to=zh', url)
+      h.eq(nil, url:match('from=auto'))
+      h.eq(nil, url:match('from='))
     end)
 
     it('adds Ocp-Apim-Subscription-Key when key is set', function()

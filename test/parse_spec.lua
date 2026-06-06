@@ -95,16 +95,13 @@ describe('translate.parse', function()
     it('parses baidu type=1 (dict) response', function()
       local r = h.exec_lua(
         function()
-          return require('translate.parse').parseTransRes(
-            {
-              type = 1,
-              from = 'en',
-              result = vim.json.encode({
-                content = { { mean = { { cont = { ['你好'] = 'hello' } } } } },
-              }),
-            },
-            { apiType = 'baidu' }
-          )
+          return require('translate.parse').parseTransRes({
+            type = 1,
+            from = 'en',
+            result = vim.json.encode({
+              content = { { mean = { { cont = { ['你好'] = 'hello' } } } } },
+            }),
+          }, { apiType = 'baidu' })
         end
       )
       h.eq({ { '你好', 'en' } }, r)
