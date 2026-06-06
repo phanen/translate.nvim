@@ -41,6 +41,11 @@ M.region = function()
   api_cfg.from = M.config.source_lang
   api_cfg.to = M.config.target_lang
   api_cfg.httpTimeout = M.config.http_timeout
+  if M.config.creds then
+    for k, v in pairs(M.config.creds) do
+      api_cfg[k] = v
+    end
+  end
 
   local results = trans.handle(api_cfg, lines)
 

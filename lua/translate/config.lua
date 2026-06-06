@@ -6,12 +6,20 @@
 ---| 'inline'
 ---| 'replace'
 
+---@class translate.Creds
+---@field key string?
+---@field region string?
+---@field url string?
+---@field model string?
+---@field systemPrompt string?
+
 ---@class translate.Config
 ---@field target_lang string
 ---@field source_lang string
 ---@field target translate.Target
 ---@field http_timeout integer
 ---@field api translate.ApiType?  -- backend; default 'google'
+---@field creds translate.Creds?  -- credentials for the selected backend
 
 local M = {}
 
@@ -23,6 +31,7 @@ M.defaults = function()
     target = 'eol',
     http_timeout = 30000,
     api = 'google',
+    creds = nil,
   }
 end
 

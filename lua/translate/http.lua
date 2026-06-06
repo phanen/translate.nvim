@@ -19,7 +19,7 @@ M.set_transport = function(fn) transport = fn end
 M.transport = function() return transport end
 
 local default_transport = function(opts, cb)
-  local args = { 'curl', '-sS', '-L', '-X', opts.method or 'GET' }
+  local args = { 'curl', '-sS', '-L', '-X', opts.method or 'GET', '-w', '\n%{http_code}' }
   for k, v in pairs(opts.headers or {}) do
     args[#args + 1] = '-H'
     args[#args + 1] = ('%s: %s'):format(k, v)
@@ -34,7 +34,16 @@ local default_transport = function(opts, cb)
   end
   args[#args + 1] = opts.url
   local out = vim.system(args, { text = true }):wait()
-  cb(out.code or 0, out.stdout or '')
+  local raw = out.stdout or ''
+  local body, status = raw, 0
+  local last_nl = raw:find('\n[^\n]*$')
+  if last_nl then
+    body = raw:sub(1, last_nl - 1)
+    local code = tonumber(raw:sub(last_nl + 1))
+    if code then status = math.floor(code) end
+    if status == 0 then status = (out.code or 0) end
+  end
+  cb(status, body)
 end
 
 ---@param opts translate.HttpOpts

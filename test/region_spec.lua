@@ -100,4 +100,28 @@ describe('translate.region', function()
     end)
     h.matches('api%.openai%.com', url)
   end)
+
+  it('forwards creds.key to microsoft api cfg', function()
+    h.set_lines({ 'hello' })
+    local headers = h.exec_lua(function()
+      require('translate').setup({
+        api = 'microsoft',
+        creds = { key = 'my-azure-key', region = 'eastasia' },
+      })
+      require('translate.http').set_transport(function(opts, cb)
+        _G._test_headers = opts.headers
+        cb(
+          200,
+          vim.json.encode({
+            { translations = { { text = 'x' } }, detectedLanguage = { language = 'en' } },
+          })
+        )
+      end)
+      vim.api.nvim_win_set_cursor(0, { 1, 0 })
+      require('translate').region()
+      return _G._test_headers
+    end)
+    h.eq('my-azure-key', headers['Ocp-Apim-Subscription-Key'])
+    h.eq('eastasia', headers['Ocp-Apim-Subscription-Region'])
+  end)
 end)

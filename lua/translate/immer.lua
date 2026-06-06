@@ -60,6 +60,11 @@ M.resync = function(buf)
       api.from = t.config.source_lang
       api.to = t.config.target_lang
       api.httpTimeout = t.config.http_timeout
+      if t.config.creds then
+        for k, v in pairs(t.config.creds) do
+          api[k] = v
+        end
+      end
       local results = require('translate.trans').handle(api, new_texts)
       local aligned = require('translate.chunker').to_eol(results, new_ranges)
       require('translate.render').extmark_eol(buf, aligned.items, aligned.ranges)
