@@ -5,6 +5,7 @@
 ---@field to string
 ---@field url string?
 ---@field key string?
+---@field region string?
 ---@field useBatchFetch boolean
 ---@field httpTimeout integer
 ---@field sortOrder integer

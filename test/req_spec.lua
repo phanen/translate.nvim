@@ -59,6 +59,61 @@ describe('translate.req', function()
       h.matches('q=a%%20b', url)
     end)
   end)
+
+  describe('genMicrosoft', function()
+    it('builds a POST request with the official url', function()
+      local url, init = h.exec_lua(
+        function()
+          return require('translate.req').genMicrosoft(
+            { apiType = 'microsoft', from = 'en', to = 'zh' },
+            'hello'
+          )
+        end
+      )
+      h.matches('api%-edge%.cognitive%.microsofttranslator%.com', url)
+      h.matches('from=en', url)
+      h.matches('to=zh', url)
+      h.matches('api%-version=3%.0', url)
+      h.eq('POST', init.method)
+      h.matches('"Text":"hello"', init.body)
+    end)
+
+    it('adds Ocp-Apim-Subscription-Key when key is set', function()
+      local _, init = h.exec_lua(
+        function()
+          return require('translate.req').genMicrosoft(
+            { apiType = 'microsoft', from = 'en', to = 'zh', key = 'secret' },
+            'hi'
+          )
+        end
+      )
+      h.eq('secret', init.headers['Ocp-Apim-Subscription-Key'])
+    end)
+
+    it('adds region header when region is set', function()
+      local _, init = h.exec_lua(
+        function()
+          return require('translate.req').genMicrosoft(
+            { apiType = 'microsoft', from = 'en', to = 'zh', region = 'eastasia' },
+            'hi'
+          )
+        end
+      )
+      h.eq('eastasia', init.headers['Ocp-Apim-Subscription-Region'])
+    end)
+
+    it('uses custom url when provided', function()
+      local url = h.exec_lua(
+        function()
+          return require('translate.req').genMicrosoft(
+            { apiType = 'microsoft', from = 'en', to = 'zh', url = 'http://localhost/t' },
+            'hi'
+          )
+        end
+      )
+      h.matches('localhost', url)
+    end)
+  end)
 end)
 
 describe('translate.api', function()
