@@ -35,7 +35,7 @@ $(NVIM_TEST):
 test: $(NVIM_TEST)
 	NVIM_TEST_VERSION=$(NVIM_TEST_VERSION) \
 	$(NVIM_TEST)/bin/nvim-test test \
-		--lpath=$(PWD)/lua/?.lua \
+		--lpath='$(PWD)/lua/?.lua;$(PWD)/lua/?/init.lua' \
 		--verbose \
 		--filter="$(FILTER)"
 
