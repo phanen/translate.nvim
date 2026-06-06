@@ -148,16 +148,13 @@ describe('translate.req', function()
     it('uses custom url and model', function()
       local url, init = h.exec_lua(
         function()
-          return require('translate.req').genOpenAI(
-            {
-              apiType = 'openai',
-              to = 'zh',
-              key = 'k',
-              url = 'http://localhost/v1',
-              model = 'glm-4',
-            },
-            'hi'
-          )
+          return require('translate.req').genOpenAI({
+            apiType = 'openai',
+            to = 'zh',
+            key = 'k',
+            url = 'http://localhost/v1',
+            model = 'glm-4',
+          }, 'hi')
         end
       )
       h.matches('localhost', url)
