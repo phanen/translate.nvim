@@ -17,7 +17,8 @@ local M = {}
 M.extract = function(buf, ft)
   local spec = require('translate.spec')
   buf = buf or 0
-  if not spec.has_captures(ft) then
+  local lang = ft and ft ~= '' and vim.treesitter.language.get_lang(ft) or nil
+  if not spec.has_captures(ft) or not lang then
     local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
     return {
       {
@@ -27,8 +28,6 @@ M.extract = function(buf, ft)
       },
     }
   end
-  local lang = vim.treesitter.language.get_lang(ft or '')
-  if not lang then return nil end
   if not pcall(vim.treesitter.language.add, lang) then return nil end
   local parser = vim.treesitter.get_parser(buf, lang, { error = false })
   if not parser then return nil end

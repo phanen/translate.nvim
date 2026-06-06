@@ -19,23 +19,35 @@ M.immer = {
   resync = function(buf) return require('translate.immer').resync(buf) end,
 }
 
-M.region = function()
-  if not M.config then return end
+---@return string[]?, translate.Range[]?
+local collect = function()
   local source = require('translate.source')
-  local trans = require('translate.trans')
-  local render = require('translate.render')
-  local api = require('translate.api')
-
-  local lines
   local mode = vim.api.nvim_get_mode().mode
   if mode:match('[vV\22]') then
     local s = vim.fn.getpos("'[")
     local e = vim.fn.getpos("']")
     local regtype = mode == 'V' and 'V' or (mode == '\22' and '\22' or 'v')
-    lines = source.range(s[2], s[3] - 1, e[2], e[3] - 1, regtype)
+    local srow, scol, erow, ecol = s[2], s[3] - 1, e[2], e[3] - 1
+    local lines = source.range(srow, scol, erow, ecol, regtype)
+    return lines, { { srow = srow, scol = scol, erow = erow, ecol = ecol } }
   else
-    lines = { source.cword() }
+    local word = source.cword()
+    if word == '' then return nil, nil end
+    local cursor = vim.api.nvim_win_get_cursor(0)
+    local row, col = cursor[1] - 1, cursor[2]
+    return { word }, { { srow = row, scol = col, erow = row, ecol = col + #word } }
   end
+end
+
+M.region = function()
+  if not M.config then return end
+  local trans = require('translate.trans')
+  local render = require('translate.render')
+  local api = require('translate.api')
+  local chunker = require('translate.chunker')
+
+  local lines, ranges = collect()
+  if not lines or #lines == 0 then return end
 
   local api_cfg = api.default_api(M.config.api or 'google')
   api_cfg.from = M.config.source_lang
@@ -49,7 +61,18 @@ M.region = function()
 
   local results = trans.handle(api_cfg, lines)
 
-  if M.config.target == 'echo' then render.echo(results) end
+  if M.config.target == 'echo' then
+    render.echo(results)
+  elseif M.config.target == 'eol' or M.config.target == 'below' then
+    ---@cast ranges translate.Range[]
+    local aligned = M.config.target == 'eol' and chunker.to_eol(results, ranges)
+      or chunker.to_below(results, ranges)
+    if M.config.target == 'eol' then
+      render.extmark_eol(0, aligned.items, aligned.ranges)
+    else
+      render.extmark_below(0, aligned.items, aligned.ranges)
+    end
+  end
 end
 
 return M
