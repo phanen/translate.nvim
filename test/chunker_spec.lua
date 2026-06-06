@@ -7,9 +7,14 @@ describe('translate.chunker', function()
 
   describe('to_eol', function()
     it('passes through single-line ranges with erow collapsed', function()
-      local r = h.exec_lua(function()
-        return require('translate.chunker').to_eol({ 'hi' }, { { srow = 0, scol = 0, erow = 0, ecol = 5 } })
-      end)
+      local r = h.exec_lua(
+        function()
+          return require('translate.chunker').to_eol(
+            { 'hi' },
+            { { srow = 0, scol = 0, erow = 0, ecol = 5 } }
+          )
+        end
+      )
       h.eq({ items = { 'hi' }, ranges = { { srow = 0, scol = 0, erow = 0, ecol = 0 } } }, r)
     end)
 

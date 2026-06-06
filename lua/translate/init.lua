@@ -13,6 +13,12 @@ M.setup = function(opts)
   require('translate.highlight').setup()
 end
 
+M.immer = {
+  enable = function(buf, opts) return require('translate.immer').enable(buf, opts) end,
+  disable = function(buf) return require('translate.immer').disable(buf) end,
+  resync = function(buf) return require('translate.immer').resync(buf) end,
+}
+
 M.region = function()
   if not M.config then return end
   local source = require('translate.source')
