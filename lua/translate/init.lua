@@ -10,6 +10,7 @@ M.setup = function(opts)
   local cfg = config.merge(config.defaults(), opts)
   config.validate(cfg)
   M.config = cfg
+  require('translate.highlight').setup()
 end
 
 return M
