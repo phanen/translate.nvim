@@ -124,4 +124,23 @@ describe('translate.region', function()
     h.eq('my-azure-key', headers['Ocp-Apim-Subscription-Key'])
     h.eq('eastasia', headers['Ocp-Apim-Subscription-Region'])
   end)
+
+  it('uses config.api = mymemory when set (no key required)', function()
+    h.set_lines({ 'hello' })
+    local url = h.exec_lua(function()
+      require('translate').setup({ api = 'mymemory' })
+      require('translate.http').set_transport(function(opts, cb)
+        _G._test_url = opts.url
+        cb(
+          200,
+          vim.json.encode({ responseData = { translatedText = '你好' }, responseStatus = 200 })
+        )
+      end)
+      vim.api.nvim_win_set_cursor(0, { 1, 0 })
+      require('translate').region()
+      return _G._test_url
+    end)
+    h.matches('api%.mymemory%.translated%.net', url)
+    h.matches('langpair=en%%7czh%-Hans', url)
+  end)
 end)

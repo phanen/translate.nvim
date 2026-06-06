@@ -60,6 +60,30 @@ M.genOpenAI = function(api, text)
   return url, { method = 'POST', headers = headers, body = body }, user_msg
 end
 
-M.genReqFuncs = { google = M.genGoogle, microsoft = M.genMicrosoft, openai = M.genOpenAI }
+---@param api translate.Api
+---@param text string
+---@return string url
+---@return table init
+---@return any _user_msg
+M.genMyMemory = function(api, text)
+  local url = api.url or 'https://api.mymemory.translated.net/get'
+  local from = (api.from and api.from ~= 'auto') and api.from or 'en'
+  local langpair = ('%s|%s'):format(from, api.to or 'zh-Hans')
+  local params = { q = text, langpair = langpair }
+  if api.key then params.de = api.key end
+  local q = {}
+  for k, v in pairs(params) do
+    q[#q + 1] = ('%s=%s'):format(k, vim.uri_encode(tostring(v)))
+  end
+  url = url .. '?' .. table.concat(q, '&')
+  return url, { method = 'GET', headers = {}, body = nil }, nil
+end
+
+M.genReqFuncs = {
+  google = M.genGoogle,
+  microsoft = M.genMicrosoft,
+  openai = M.genOpenAI,
+  mymemory = M.genMyMemory,
+}
 
 return M

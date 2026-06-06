@@ -53,6 +53,32 @@ describe('translate.parse', function()
       )
       h.eq({ { 'plain translation', '' } }, r)
     end)
+
+    it('parses mymemory response', function()
+      local r = h.exec_lua(
+        function()
+          return require('translate.parse').parseTransRes(
+            { responseData = { translatedText = '你好', match = '0.95' }, responseStatus = 200 },
+            { apiType = 'mymemory' }
+          )
+        end
+      )
+      h.eq({ { '你好', '0.95' } }, r)
+    end)
+
+    it('throws on mymemory non-200 response', function()
+      local r = h.exec_lua(function()
+        local ok, err = pcall(
+          require('translate.parse').parseTransRes,
+          { responseStatus = 403, responseDetails = 'INVALID LANGUAGE PAIR' },
+          { apiType = 'mymemory' }
+        )
+        return { ok = ok, err = err or '' }
+      end)
+      h.eq(false, r.ok)
+      h.matches('mymemory error 403', r.err)
+      h.matches('INVALID LANGUAGE PAIR', r.err)
+    end)
   end)
 
   describe('parseAIRes', function()

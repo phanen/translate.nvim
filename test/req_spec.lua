@@ -115,6 +115,46 @@ describe('translate.req', function()
     end)
   end)
 
+  describe('genMyMemory', function()
+    it('builds a GET request with default url and langpair', function()
+      local url = h.exec_lua(
+        function()
+          return require('translate.req').genMyMemory(
+            { apiType = 'mymemory', from = 'en', to = 'zh' },
+            'hello'
+          )
+        end
+      )
+      h.matches('api%.mymemory%.translated%.net', url)
+      h.matches('langpair=en%%7czh', url)
+      h.matches('q=hello', url)
+    end)
+
+    it('falls back to en when from is auto', function()
+      local url = h.exec_lua(
+        function()
+          return require('translate.req').genMyMemory(
+            { apiType = 'mymemory', from = 'auto', to = 'zh' },
+            'hi'
+          )
+        end
+      )
+      h.matches('langpair=en%%7czh', url)
+    end)
+
+    it('adds de (email) param when key is set', function()
+      local url = h.exec_lua(
+        function()
+          return require('translate.req').genMyMemory(
+            { apiType = 'mymemory', from = 'en', to = 'zh', key = 'me@x.com' },
+            'hi'
+          )
+        end
+      )
+      h.matches('de=me@x%.com', url)
+    end)
+  end)
+
   describe('genOpenAI', function()
     it('builds a POST request with default url and model', function()
       local url, init = h.exec_lua(

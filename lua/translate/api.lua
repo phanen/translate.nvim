@@ -18,10 +18,11 @@
 ---| 'google'
 ---| 'microsoft'
 ---| 'openai'
+---| 'mymemory'
 
 local M = {}
 
-M.TYPES = { 'google', 'microsoft', 'openai' }
+M.TYPES = { 'google', 'microsoft', 'openai', 'mymemory' }
 
 ---@param api_type translate.ApiType
 ---@return translate.Api

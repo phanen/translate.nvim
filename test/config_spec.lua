@@ -56,6 +56,7 @@ describe('translate.config', function()
     it('accepts known api values', function()
       h.eq('', run({ api = 'microsoft' }))
       h.eq('', run({ api = 'openai' }))
+      h.eq('', run({ api = 'mymemory' }))
     end)
 
     it('rejects unknown api', function() h.matches('invalid api', run({ api = 'deepl' })) end)

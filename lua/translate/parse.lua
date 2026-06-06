@@ -71,6 +71,18 @@ M.parseTransRes = function(res, api)
       r[#r + 1] = { table.concat(t, ' '), (item.detectedLanguage or {}).language or '' }
     end
     return r
+  elseif api.apiType == 'mymemory' then
+    local data = (res or {}).responseData or {}
+    local status = (res or {}).responseStatus or 0
+    if status ~= 200 then
+      error(
+        ('mymemory error %s: %s'):format(
+          tostring(status),
+          tostring((res or {}).responseDetails or '')
+        )
+      )
+    end
+    return { { tostring(data.translatedText or ''), tostring(data.match or '') } }
   elseif api.apiType == 'openai' then
     local content = type(res) == 'string' and res
       or (((res or {}).choices or {})[1] or {}).message and (((res or {}).choices[1].message or {}).content or '')
