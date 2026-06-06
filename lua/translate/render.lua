@@ -16,4 +16,47 @@ M.echo = function(items, sink)
   end
 end
 
+---@param buf integer
+---@param items string[]
+---@param ranges translate.Range[]
+M.extmark_eol = function(buf, items, ranges)
+  local ns = require('translate.ns').eol
+  vim.api.nvim_buf_clear_namespace(buf, ns, 0, -1)
+  for i, item in ipairs(items) do
+    local r = ranges[i]
+    if r then
+      vim.api.nvim_buf_set_extmark(buf, ns, r.srow, r.scol, {
+        end_row = r.erow,
+        end_col = r.ecol,
+        virt_text = { { item, 'TranslateTrans' } },
+        virt_text_pos = 'eol',
+      })
+    end
+  end
+end
+
+---@param buf integer
+---@param items string[]
+---@param ranges translate.Range[]
+M.extmark_below = function(buf, items, ranges)
+  local ns = require('translate.ns').below
+  vim.api.nvim_buf_clear_namespace(buf, ns, 0, -1)
+  for i, item in ipairs(items) do
+    local r = ranges[i]
+    if r then
+      vim.api.nvim_buf_set_extmark(buf, ns, r.srow, r.scol, {
+        virt_lines = { { { item, 'TranslateTrans' } } },
+      })
+    end
+  end
+end
+
+---@param buf integer
+---@param which string?
+M.extmark_clear = function(buf, which)
+  local ns_mod = require('translate.ns')
+  local ns = ns_mod[which or 'eol'] or ns_mod.eol
+  vim.api.nvim_buf_clear_namespace(buf, ns, 0, -1)
+end
+
 return M
