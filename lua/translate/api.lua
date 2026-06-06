@@ -6,6 +6,9 @@
 ---@field url string?
 ---@field key string?
 ---@field region string?
+---@field model string?
+---@field systemPrompt string?
+---@field temperature number?
 ---@field useBatchFetch boolean
 ---@field httpTimeout integer
 ---@field sortOrder integer

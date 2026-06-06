@@ -114,6 +114,66 @@ describe('translate.req', function()
       h.matches('localhost', url)
     end)
   end)
+
+  describe('genOpenAI', function()
+    it('builds a POST request with default url and model', function()
+      local url, init = h.exec_lua(
+        function()
+          return require('translate.req').genOpenAI(
+            { apiType = 'openai', from = 'en', to = 'zh', key = 'k' },
+            'hello'
+          )
+        end
+      )
+      h.matches('api%.openai%.com', url)
+      h.eq('POST', init.method)
+      h.matches('"model":"gpt%-4"', init.body)
+      h.matches('"role":"system"', init.body)
+      h.matches('"role":"user"', init.body)
+      h.matches('"content":"hello"', init.body)
+    end)
+
+    it('adds Authorization Bearer header', function()
+      local _, init = h.exec_lua(
+        function()
+          return require('translate.req').genOpenAI(
+            { apiType = 'openai', to = 'zh', key = 'secret' },
+            'hi'
+          )
+        end
+      )
+      h.eq('Bearer secret', init.headers['Authorization'])
+    end)
+
+    it('uses custom url and model', function()
+      local url, init = h.exec_lua(
+        function()
+          return require('translate.req').genOpenAI(
+            {
+              apiType = 'openai',
+              to = 'zh',
+              key = 'k',
+              url = 'http://localhost/v1',
+              model = 'glm-4',
+            },
+            'hi'
+          )
+        end
+      )
+      h.matches('localhost', url)
+      h.matches('"model":"glm%-4"', init.body)
+    end)
+
+    it('returns user_msg as third value', function()
+      local user_msg = h.exec_lua(function()
+        local _, _, m =
+          require('translate.req').genOpenAI({ apiType = 'openai', to = 'zh', key = 'k' }, 'hello')
+        return m
+      end)
+      h.eq('user', user_msg.role)
+      h.eq('hello', user_msg.content)
+    end)
+  end)
 end)
 
 describe('translate.api', function()

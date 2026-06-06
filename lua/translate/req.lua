@@ -39,6 +39,27 @@ M.genMicrosoft = function(api, text)
   return url, { method = 'POST', headers = headers, body = body }, nil
 end
 
-M.genReqFuncs = { google = M.genGoogle, microsoft = M.genMicrosoft }
+---@param api translate.Api
+---@param text string
+---@return string url
+---@return table init
+---@return table? user_msg
+M.genOpenAI = function(api, text)
+  local url = api.url or 'https://api.openai.com/v1/chat/completions'
+  local headers =
+    { ['Content-Type'] = 'application/json', Authorization = 'Bearer ' .. (api.key or '') }
+  local model = api.model or 'gpt-4'
+  local sys = api.systemPrompt
+    or ('Translate the following to %s. Output only the translation.'):format(api.to)
+  local body = vim.json.encode({
+    model = model,
+    messages = { { role = 'system', content = sys }, { role = 'user', content = text } },
+    temperature = api.temperature or 0,
+  })
+  local user_msg = { role = 'user', content = text }
+  return url, { method = 'POST', headers = headers, body = body }, user_msg
+end
+
+M.genReqFuncs = { google = M.genGoogle, microsoft = M.genMicrosoft, openai = M.genOpenAI }
 
 return M
