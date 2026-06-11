@@ -45,6 +45,7 @@ M.region = function()
   local render = require('translate.render')
   local api = require('translate.api')
   local chunker = require('translate.chunker')
+  local http = require('translate.http')
 
   local lines, ranges = collect()
   if not lines or #lines == 0 then return end
@@ -59,20 +60,21 @@ M.region = function()
     end
   end
 
-  local results = trans.handle(api_cfg, lines)
-
-  if M.config.target == 'echo' then
-    render.echo(results)
-  elseif M.config.target == 'eol' or M.config.target == 'below' then
+  local target = M.config.target
+  trans.handle_async(api_cfg, lines, nil, function(r)
+    ---@cast r string[]
     ---@cast ranges translate.Range[]
-    local aligned = M.config.target == 'eol' and chunker.to_eol(results, ranges)
-      or chunker.to_below(results, ranges)
-    if M.config.target == 'eol' then
-      render.extmark_eol(0, aligned.items, aligned.ranges)
-    else
-      render.extmark_below(0, aligned.items, aligned.ranges)
+    if target == 'echo' then
+      render.echo(r)
+    elseif target == 'eol' or target == 'below' then
+      local aligned = target == 'eol' and chunker.to_eol(r, ranges) or chunker.to_below(r, ranges)
+      if target == 'eol' then
+        render.extmark_eol(0, aligned.items, aligned.ranges)
+      else
+        render.extmark_below(0, aligned.items, aligned.ranges)
+      end
     end
-  end
+  end, http.fetch_async)
 end
 
 return M

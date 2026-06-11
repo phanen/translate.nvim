@@ -25,10 +25,10 @@ describe('translate.immer', function()
 
   it('skips unchanged nodes on second resync', function()
     local call_count = h.exec_lua(function()
-      _G._test_call_count = 0
+      _G._t_calls = 0
       require('translate').setup()
       require('translate.http').set_transport(function(_, cb)
-        _G._test_call_count = _G._test_call_count + 1
+        _G._t_calls = _G._t_calls + 1
         cb(200, vim.json.encode({ sentences = { { trans = '你好' } }, src = 'en' }))
       end)
       vim.api.nvim_buf_set_lines(0, 0, -1, false, { '-- a comment', 'local x = 1' })
@@ -36,17 +36,17 @@ describe('translate.immer', function()
       require('translate').immer.enable(0)
       require('translate').immer.resync(0)
       require('translate').immer.resync(0)
-      return _G._test_call_count
+      return _G._t_calls
     end)
     h.eq(1, call_count)
   end)
 
   it('retranslates when text changes', function()
     local call_count = h.exec_lua(function()
-      _G._test_call_count = 0
+      _G._t_calls = 0
       require('translate').setup()
       require('translate.http').set_transport(function(_, cb)
-        _G._test_call_count = _G._test_call_count + 1
+        _G._t_calls = _G._t_calls + 1
         cb(200, vim.json.encode({ sentences = { { trans = '你好' } }, src = 'en' }))
       end)
       vim.api.nvim_buf_set_lines(0, 0, -1, false, { '-- first', 'local x = 1' })
@@ -55,7 +55,7 @@ describe('translate.immer', function()
       require('translate').immer.resync(0)
       vim.api.nvim_buf_set_lines(0, 0, -1, false, { '-- second', 'local x = 1' })
       require('translate').immer.resync(0)
-      return _G._test_call_count
+      return _G._t_calls
     end)
     h.eq(2, call_count)
   end)
