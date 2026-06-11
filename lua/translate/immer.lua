@@ -79,7 +79,10 @@ M.resync = function(buf)
       render.extmark_clear(buf, target)
       local align = target == 'eol' and chunker.to_eol or chunker.to_below
       local write = target == 'eol' and render.extmark_eol
-        or (target == 'below' and render.extmark_below or render.extmark_inline)
+        or (
+          target == 'below' and render.extmark_below
+          or (target == 'replace' and render.extmark_replace or render.extmark_inline)
+        )
       trans.handle_async(
         api,
         to_translate,
