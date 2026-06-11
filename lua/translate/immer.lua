@@ -65,9 +65,15 @@ M.resync = function(buf)
           api[k] = v
         end
       end
-      local results = require('translate.trans').handle(api, new_texts)
-      local aligned = require('translate.chunker').to_eol(results, new_ranges)
-      require('translate.render').extmark_eol(buf, aligned.items, aligned.ranges)
+      local http = require('translate.http')
+      local trans = require('translate.trans')
+      local chunker = require('translate.chunker')
+      local render = require('translate.render')
+      trans.handle_async(api, new_texts, nil, function(results)
+        ---@cast results string[]
+        local aligned = chunker.to_eol(results, new_ranges)
+        render.extmark_eol(buf, aligned.items, aligned.ranges)
+      end, http.fetch_async)
     end
   end
 
