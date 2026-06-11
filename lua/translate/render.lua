@@ -88,14 +88,30 @@ M.extmark_replace = function(buf, items, ranges, clear)
     local r = ranges[i]
     local clean = item:gsub('%z', ''):gsub('[\r\n]+', ' ')
     if r then
+      local hl = ''
+      local ok, pos = pcall(vim.inspect_pos, buf, r.srow, r.scol)
+      if ok then
+        if pos and pos.treesitter and #pos.treesitter > 0 then
+          hl = pos.treesitter[#pos.treesitter].hl_group or hl
+        end
+        if hl == '' and pos and pos.syntax and #pos.syntax > 0 then
+          hl = pos.syntax[#pos.syntax].hl_group or hl
+        end
+      end
       local w = vim.fn.strdisplaywidth(clean)
       local span = r.ecol - r.scol
       local padded = clean
       if w < span then padded = clean .. (' '):rep(span - w) end
+      local chunks
+      if hl ~= '' then
+        chunks = { { padded, hl } }
+      else
+        chunks = { { padded } }
+      end
       vim.api.nvim_buf_set_extmark(buf, ns, r.srow, r.scol, {
         end_row = r.erow,
         end_col = r.ecol,
-        virt_text = { { padded } },
+        virt_text = chunks,
         virt_text_pos = 'overlay',
         virt_text_hide = false,
         hl_mode = 'replace',
