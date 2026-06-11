@@ -32,6 +32,7 @@ M.enable = function(buf, opts)
     on_bytes = function() on_change() end,
     on_detach = function() M.disable(buf) end,
   })
+  vim.schedule(function() M.resync(buf) end)
 end
 
 ---@param buf integer
