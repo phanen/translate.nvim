@@ -92,9 +92,9 @@ M.extmark_replace = function(buf, items, ranges, clear)
         end_row = r.erow,
         end_col = r.ecol,
         virt_text = { { clean, 'TranslateTrans' } },
-        virt_text_pos = 'inline',
-        virt_text_hide = true,
-        conceal_lines = '',
+        virt_text_pos = 'overlay',
+        virt_text_hide = false,
+        hl_mode = 'replace',
       })
     end
   end

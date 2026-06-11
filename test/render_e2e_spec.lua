@@ -66,7 +66,7 @@ describe('translate.region', function()
       require('translate').region()
     end)
     screen:expect([[
-      你好^hello world                                             |
+      ^你好o world                                                 |
       ~                                                           |
       ~                                                           |
       ~                                                           |
