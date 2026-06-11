@@ -76,14 +76,17 @@ M.resync = function(buf)
         new_texts,
         { batchSize = 1 },
         function(results)
+          ---@cast results string[]
           local aligned = chunker.to_eol(results, new_ranges)
           render.extmark_eol(buf, aligned.items, aligned.ranges)
         end,
         http.fetch_async,
-        function(results)
-          ---@cast results string[]
-          local aligned = chunker.to_eol(results, new_ranges)
-          render.extmark_eol(buf, aligned.items, aligned.ranges, false)
+        function(orig, translation, _)
+          local r = new_ranges[orig]
+          if r then
+            local clean = translation:gsub('%z', ''):gsub('[\r\n]+', ' ')
+            render.extmark_eol(buf, { clean }, { r }, false)
+          end
         end
       )
     end

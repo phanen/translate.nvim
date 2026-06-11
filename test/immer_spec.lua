@@ -78,4 +78,26 @@ describe('translate.immer', function()
     end)
     h.eq(0, marks)
   end)
+
+  it('places exactly one extmark per comment line (no duplicates)', function()
+    local marks = h.exec_lua(function()
+      require('translate').setup()
+      require('translate.http').set_transport(
+        function(_, cb)
+          cb(200, vim.json.encode({ sentences = { { trans = '注释' } }, src = 'en' }))
+        end
+      )
+      vim.api.nvim_buf_set_lines(0, 0, -1, false, { '-- a', '-- b', '-- c' })
+      vim.bo.filetype = 'lua'
+      require('translate').immer.enable(0)
+      require('translate').immer.resync(0)
+      local ns = require('translate.ns').eol
+      return vim.api.nvim_buf_get_extmarks(0, ns, 0, -1, { details = true })
+    end)
+    h.eq(3, #marks)
+    for _, m in ipairs(marks) do
+      h.eq(1, #m[4].virt_text)
+      h.eq({ '注释', 'TranslateTrans' }, m[4].virt_text[1])
+    end
+  end)
 end)
