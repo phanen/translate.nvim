@@ -88,10 +88,14 @@ M.extmark_replace = function(buf, items, ranges, clear)
     local r = ranges[i]
     local clean = item:gsub('%z', ''):gsub('[\r\n]+', ' ')
     if r then
+      local w = vim.fn.strdisplaywidth(clean)
+      local span = r.ecol - r.scol
+      local padded = clean
+      if w < span then padded = clean .. (' '):rep(span - w) end
       vim.api.nvim_buf_set_extmark(buf, ns, r.srow, r.scol, {
         end_row = r.erow,
         end_col = r.ecol,
-        virt_text = { { clean, 'TranslateTrans' } },
+        virt_text = { { padded, 'TranslateTrans' } },
         virt_text_pos = 'overlay',
         virt_text_hide = false,
         hl_mode = 'replace',
