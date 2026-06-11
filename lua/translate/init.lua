@@ -28,8 +28,9 @@ local collect = function()
     local e = vim.fn.getpos("']")
     local regtype = mode == 'V' and 'V' or (mode == '\22' and '\22' or 'v')
     local srow, scol, erow, ecol = s[2], s[3] - 1, e[2], e[3] - 1
-    local lines = source.range(srow, scol, erow, ecol, regtype)
-    return lines, { { srow = srow, scol = scol, erow = erow, ecol = ecol } }
+    local raw = source.range(srow, scol, erow, ecol, regtype)
+    local full = table.concat(raw, '\n')
+    return { full }, { { srow = srow, scol = scol, erow = erow, ecol = ecol } }
   else
     local word = source.cword()
     if word == '' then return nil, nil end
