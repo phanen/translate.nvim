@@ -71,9 +71,11 @@ M.resync = function(buf)
       local chunker = require('translate.chunker')
       local render = require('translate.render')
       render.extmark_clear(buf, 'eol')
+      if api.apiType == 'microsoft' then api.useBatchFetch = true end
+      local to_translate = extract.strip_prefix(new_texts)
       trans.handle_async(
         api,
-        new_texts,
+        to_translate,
         { batchSize = 1 },
         function(results)
           ---@cast results string[]

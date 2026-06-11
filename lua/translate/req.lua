@@ -20,11 +20,12 @@ M.genGoogle = function(api, text)
 end
 
 ---@param api translate.Api
----@param text string
+---@param text_or_texts string|string[]
 ---@return string url
 ---@return table init
 ---@return any _user_msg
-M.genMicrosoft = function(api, text)
+M.genMicrosoft = function(api, text_or_texts)
+  local texts = type(text_or_texts) == 'table' and text_or_texts or { text_or_texts }
   local url = api.url or 'https://api-edge.cognitive.microsofttranslator.com/translate'
   local params = { to = api.to, ['api-version'] = '3.0' }
   if api.from and api.from ~= 'auto' then params.from = api.from end
@@ -41,7 +42,11 @@ M.genMicrosoft = function(api, text)
     local token = require('translate.ms_auth').fetch()
     if token then headers['Authorization'] = 'Bearer ' .. token end
   end
-  local body = vim.json.encode({ { Text = text } })
+  local items = {}
+  for _, t in ipairs(texts) do
+    items[#items + 1] = { Text = t }
+  end
+  local body = vim.json.encode(items)
   return url, { method = 'POST', headers = headers, body = body }, nil
 end
 

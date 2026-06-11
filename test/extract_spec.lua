@@ -76,4 +76,36 @@ describe('translate.extract', function()
       h.eq('plain text line', nodes[1].text)
     end)
   end)
+
+  describe('strip_prefix', function()
+    it('returns same texts when there is only one', function()
+      local r = h.exec_lua(
+        function() return require('translate.extract').strip_prefix({ 'hello' }) end
+      )
+      h.eq({ 'hello' }, r)
+    end)
+
+    it('strips common prefix like comment markers', function()
+      local r = h.exec_lua(
+        function() return require('translate.extract').strip_prefix({ '//! a', '//! b', '//! c' }) end
+      )
+      h.eq({ 'a', 'b', 'c' }, r)
+    end)
+
+    it('keeps texts unchanged when there is no common prefix', function()
+      local r = h.exec_lua(
+        function() return require('translate.extract').strip_prefix({ 'hello', 'world' }) end
+      )
+      h.eq({ 'hello', 'world' }, r)
+    end)
+
+    it('handles prefix with trailing whitespace', function()
+      local r = h.exec_lua(
+        function()
+          return require('translate.extract').strip_prefix({ '-- comment a', '-- comment b' })
+        end
+      )
+      h.eq({ 'a', 'b' }, r)
+    end)
+  end)
 end)

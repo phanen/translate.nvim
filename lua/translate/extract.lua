@@ -86,4 +86,28 @@ M.restore = function(response)
   return result
 end
 
+---@param texts string[]
+---@return string[]
+M.strip_prefix = function(texts)
+  if #texts < 2 then return texts end
+  local prefix = texts[1]
+  for i = 2, #texts do
+    local t = texts[i]
+    local n = 0
+    while n < #prefix and n < #t and prefix:byte(n + 1) == t:byte(n + 1) do
+      n = n + 1
+    end
+    prefix = prefix:sub(1, n)
+    if prefix == '' then break end
+  end
+  if prefix == '' then return texts end
+  local trimmed = prefix:gsub('%s+$', '')
+  if trimmed == '' then return texts end
+  local result = {}
+  for _, t in ipairs(texts) do
+    result[#result + 1] = t:sub(#trimmed + 1):gsub('^%s+', '')
+  end
+  return result
+end
+
 return M

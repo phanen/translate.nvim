@@ -32,6 +32,45 @@ M.handle_async = function(api, segments, opts, cb, http_fetch, on_segment)
     return
   end
 
+  if api.useBatchFetch then
+    local gen = req.genReqFuncs[api.apiType]
+    assert(gen, ('unknown api type: %s'):format(api.apiType))
+    local url, init = gen(api, to_fetch)
+    http_fetch({
+      url = url,
+      method = init.method,
+      headers = init.headers,
+      body = init.body,
+      timeout = api.httpTimeout,
+    }, function(status, body)
+      if status < 200 or status >= 300 then
+        error(('http error %d: %s'):format(status, body))
+        return
+      end
+      ---@cast body string
+      local ok, res = pcall(vim.json.decode, body)
+      if not ok then
+        local preview = body:sub(1, 200)
+        error(('non-json response from %s: %s'):format(api.apiType, preview))
+        return
+      end
+      ---@cast res table
+      local parsed = parse.parseTransRes(res, api)
+      for i = 1, math.min(#to_fetch, #parsed) do
+        local orig = idx_map[i]
+        local translation = parsed[i][1]
+        results[orig] = translation
+        local src = to_fetch[i]
+        if translation ~= '' then
+          cache.set(api.apiType, src, api.from or '', api.to or '', translation)
+        end
+        if on_segment then on_segment(orig, translation, src) end
+      end
+      cb(results)
+    end)
+    return
+  end
+
   local chunks = batch.chunk(to_fetch, opts)
   local pos = 0
   local function run_chunk(idx)
