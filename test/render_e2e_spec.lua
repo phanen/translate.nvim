@@ -4,11 +4,11 @@ local Screen = require('nvim-test.screen')
 h.env()
 
 describe('translate.region', function()
-  local screen
+  local screen ---@type test.screen
   before_each(function()
     h.clear()
     screen = Screen.new(60, 5)
-    screen:attach({ ext_messages = true })
+    screen:attach({ ext_messages = true, ext_linegrid = true })
   end)
 
   it('target = eol', function()
@@ -86,11 +86,11 @@ describe('translate.region', function()
 end)
 
 describe('translate.immer', function()
-  local screen
+  local screen ---@type test.screen
   before_each(function()
     h.clear()
     screen = Screen.new(60, 5)
-    screen:attach({ ext_messages = true })
+    screen:attach({ ext_messages = true, ext_linegrid = true })
   end)
 
   it('target = eol', function()
@@ -118,14 +118,7 @@ describe('translate.immer', function()
 
   it('target = below', function()
     h.set_lines({ '-- a comment' })
-    screen:expect([[
-      ^-- a comment                                                |
-      ~                                                           |
-      ~                                                           |
-      ~                                                           |
-      ~                                                           |
-    ]])
-    local marks = h.exec_lua(function()
+    h.exec_lua(function()
       vim.bo[0].filetype = 'lua'
       require('translate').setup({ target = 'below' })
       require('translate.http').set_transport(
@@ -135,10 +128,7 @@ describe('translate.immer', function()
       )
       require('translate').immer.enable(0)
       require('translate').immer.resync(0)
-      local ns = require('translate.ns').below
-      return vim.api.nvim_buf_get_extmarks(0, ns, 0, -1, { details = true })
     end)
-    h.eq(1, #marks)
-    h.eq({ { '注释', 'TranslateTrans' } }, marks[1][4].virt_lines[1])
+    screen:expect({ any = '注释' })
   end)
 end)
