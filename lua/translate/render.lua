@@ -24,11 +24,12 @@ M.extmark_eol = function(buf, items, ranges)
   vim.api.nvim_buf_clear_namespace(buf, ns, 0, -1)
   for i, item in ipairs(items) do
     local r = ranges[i]
+    local clean = item:gsub('%z', ''):gsub('[\r\n]+', ' ')
     if r then
       vim.api.nvim_buf_set_extmark(buf, ns, r.srow, r.scol, {
         end_row = r.erow,
         end_col = r.ecol,
-        virt_text = { { item, 'TranslateTrans' } },
+        virt_text = { { clean, 'TranslateTrans' } },
         virt_text_pos = 'eol',
       })
     end
@@ -43,9 +44,10 @@ M.extmark_below = function(buf, items, ranges)
   vim.api.nvim_buf_clear_namespace(buf, ns, 0, -1)
   for i, item in ipairs(items) do
     local r = ranges[i]
+    local clean = item:gsub('%z', ''):gsub('[\r\n]+', ' ')
     if r then
       vim.api.nvim_buf_set_extmark(buf, ns, r.srow, r.scol, {
-        virt_lines = { { { item, 'TranslateTrans' } } },
+        virt_lines = { { { clean, 'TranslateTrans' } } },
       })
     end
   end

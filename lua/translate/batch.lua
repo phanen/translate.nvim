@@ -1,6 +1,6 @@
 ---@class translate.BatchOpts
----@field batchSize integer
----@field batchLength integer
+---@field batchSize integer?
+---@field batchLength integer?
 
 ---@type translate.BatchOpts
 local defaults = { batchSize = 30, batchLength = 4000 }
