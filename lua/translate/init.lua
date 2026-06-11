@@ -47,12 +47,14 @@ M.region = function()
     ---@cast ranges translate.Range[]
     if target == 'echo' then
       render.echo(r)
-    elseif target == 'eol' or target == 'below' then
+    elseif target == 'eol' or target == 'below' or target == 'inline' then
       local aligned = target == 'eol' and chunker.to_eol(r, ranges) or chunker.to_below(r, ranges)
       if target == 'eol' then
         render.extmark_eol(0, aligned.items, aligned.ranges)
-      else
+      elseif target == 'below' then
         render.extmark_below(0, aligned.items, aligned.ranges)
+      else
+        render.extmark_inline(0, aligned.items, aligned.ranges)
       end
     end
   end, http.fetch_async)

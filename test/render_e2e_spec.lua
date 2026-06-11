@@ -139,4 +139,23 @@ describe('translate.immer (visible behavior)', function()
     h.eq(1, #marks)
     h.eq({ { '注释', 'TranslateTrans' } }, marks[1][4].virt_lines[1])
   end)
+
+  it('region with target = inline places inline virt_text', function()
+    local marks = h.exec_lua(function()
+      require('translate').setup({ target = 'inline' })
+      require('translate.http').set_transport(
+        function(_, cb)
+          cb(200, vim.json.encode({ sentences = { { trans = '你好' } }, src = 'en' }))
+        end
+      )
+      vim.api.nvim_buf_set_lines(0, 0, -1, false, { 'hello world' })
+      vim.api.nvim_win_set_cursor(0, { 1, 0 })
+      require('translate').region()
+      local ns = require('translate.ns').inline
+      return vim.api.nvim_buf_get_extmarks(0, ns, 0, -1, { details = true })
+    end)
+    h.eq(1, #marks)
+    h.eq('inline', marks[1][4].virt_text_pos)
+    h.eq({ { '你好', 'TranslateTrans' } }, marks[1][4].virt_text)
+  end)
 end)

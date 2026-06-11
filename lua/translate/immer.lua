@@ -77,31 +77,24 @@ M.resync = function(buf)
       local render = require('translate.render')
       local target = s.target
       render.extmark_clear(buf, target)
-      local is_eol = target == 'eol'
+      local align = target == 'eol' and chunker.to_eol or chunker.to_below
+      local write = target == 'eol' and render.extmark_eol
+        or (target == 'below' and render.extmark_below or render.extmark_inline)
       trans.handle_async(
         api,
         to_translate,
         { batchSize = 1 },
         function(results)
           ---@cast results string[]
-          local aligned = is_eol and chunker.to_eol(results, new_ranges)
-            or chunker.to_below(results, new_ranges)
-          if is_eol then
-            render.extmark_eol(buf, aligned.items, aligned.ranges)
-          else
-            render.extmark_below(buf, aligned.items, aligned.ranges)
-          end
+          local aligned = align(results, new_ranges)
+          write(buf, aligned.items, aligned.ranges)
         end,
         http.fetch_async,
         function(orig, translation, _)
           local r = new_ranges[orig]
           if r then
             local clean = translation:gsub('%z', ''):gsub('[\r\n]+', ' ')
-            if is_eol then
-              render.extmark_eol(buf, { clean }, { r }, false)
-            else
-              render.extmark_below(buf, { clean }, { r }, false)
-            end
+            write(buf, { clean }, { r }, false)
           end
         end
       )
