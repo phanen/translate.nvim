@@ -3,10 +3,10 @@ local Screen = require('nvim-test.screen')
 
 h.env()
 
-describe('translate.region (eol render)', function()
+describe('translate.region', function()
   before_each(h.clear)
 
-  it('shows the translation at eol via screen:expect', function()
+  it('target = eol', function()
     local screen = Screen.new(60, 5)
     screen:attach({ ext_messages = true })
     h.set_lines({ 'hello world' })
@@ -29,7 +29,7 @@ describe('translate.region (eol render)', function()
     ]])
   end)
 
-  it('shows the inline translation pushing source text right', function()
+  it('target = inline', function()
     local screen = Screen.new(60, 5)
     screen:attach({ ext_messages = true })
     h.set_lines({ 'hello world' })
@@ -52,7 +52,30 @@ describe('translate.region (eol render)', function()
     ]])
   end)
 
-  it('no-op when cword is empty (whitespace, punctuation)', function()
+  it('target = replace', function()
+    local screen = Screen.new(60, 5)
+    screen:attach({ ext_messages = true })
+    h.set_lines({ 'hello world' })
+    h.exec_lua(function()
+      require('translate').setup({ target = 'replace' })
+      require('translate.http').set_transport(
+        function(_, cb)
+          cb(200, vim.json.encode({ sentences = { { trans = '你好' } }, src = 'en' }))
+        end
+      )
+      vim.api.nvim_win_set_cursor(0, { 1, 0 })
+      require('translate').region()
+    end)
+    screen:expect([[
+      你好^hello world                                             |
+      ~                                                           |
+      ~                                                           |
+      ~                                                           |
+      ~                                                           |
+    ]])
+  end)
+
+  it('no-op on empty cword', function()
     h.set_lines({ '   ' })
     local ok = h.exec_lua(function()
       require('translate').setup()
@@ -63,10 +86,10 @@ describe('translate.region (eol render)', function()
   end)
 end)
 
-describe('translate.immer (visible behavior)', function()
+describe('translate.immer', function()
   before_each(h.clear)
 
-  it('shows the comment translation at eol', function()
+  it('target = eol', function()
     local screen = Screen.new(60, 5)
     screen:attach({ ext_messages = true })
     h.set_lines({ '-- a lua comment', 'local x = 1' })
@@ -91,16 +114,25 @@ describe('translate.immer (visible behavior)', function()
     ]])
   end)
 
-  it('immer resync places virt_lines when target = below', function()
+  it('target = below', function()
+    local screen = Screen.new(60, 5)
+    screen:attach({ ext_messages = true })
+    h.set_lines({ '-- a comment' })
+    screen:expect([[
+      ^-- a comment                                                |
+      ~                                                           |
+      ~                                                           |
+      ~                                                           |
+      ~                                                           |
+    ]])
     local marks = h.exec_lua(function()
+      vim.bo[0].filetype = 'lua'
       require('translate').setup({ target = 'below' })
       require('translate.http').set_transport(
         function(_, cb)
           cb(200, vim.json.encode({ sentences = { { trans = '注释' } }, src = 'en' }))
         end
       )
-      vim.api.nvim_buf_set_lines(0, 0, -1, false, { '-- a comment' })
-      vim.bo.filetype = 'lua'
       require('translate').immer.enable(0)
       require('translate').immer.resync(0)
       local ns = require('translate.ns').below
@@ -108,30 +140,5 @@ describe('translate.immer (visible behavior)', function()
     end)
     h.eq(1, #marks)
     h.eq({ { '注释', 'TranslateTrans' } }, marks[1][4].virt_lines[1])
-  end)
-
-  describe('target = replace', function()
-    it('shows inline translation (conceal needs conceallevel >= 2)', function()
-      local screen = Screen.new(60, 5)
-      screen:attach({ ext_messages = true })
-      h.set_lines({ 'hello world' })
-      h.exec_lua(function()
-        require('translate').setup({ target = 'replace' })
-        require('translate.http').set_transport(
-          function(_, cb)
-            cb(200, vim.json.encode({ sentences = { { trans = '你好' } }, src = 'en' }))
-          end
-        )
-        vim.api.nvim_win_set_cursor(0, { 1, 0 })
-        require('translate').region()
-      end)
-      screen:expect([[
-        你好^hello world                                             |
-        ~                                                           |
-        ~                                                           |
-        ~                                                           |
-        ~                                                           |
-      ]])
-    end)
   end)
 end)
