@@ -24,13 +24,17 @@ local collect = function()
   local source = require('translate.source')
   local mode = vim.api.nvim_get_mode().mode
   if mode:match('[vV\22]') then
-    local s = vim.fn.getpos("'[")
-    local e = vim.fn.getpos("']")
+    local s = vim.fn.getpos('.')
+    local v = vim.fn.getpos('v')
     local regtype = mode == 'V' and 'V' or (mode == '\22' and '\22' or 'v')
-    local srow, scol, erow, ecol = s[2], s[3] - 1, e[2], e[3] - 1
-    local raw = source.range(srow, scol, erow, ecol, regtype)
+    local srow, scol, vrow, vcol = s[2], s[3] - 1, v[2], v[3] - 1
+    local srow0 = math.min(srow, vrow)
+    local scol0 = srow0 == srow and scol or (srow0 == vrow and vcol or 0)
+    local erow = math.max(srow, vrow)
+    local ecol = erow == srow and scol or (erow == vrow and vcol or 0)
+    local raw = source.range(srow0, scol0, erow, ecol, regtype)
     local full = table.concat(raw, '\n')
-    return { full }, { { srow = srow, scol = scol, erow = erow, ecol = ecol } }
+    return { full }, { { srow = srow0, scol = scol0, erow = erow, ecol = ecol } }
   else
     local word = source.cword()
     if word == '' then return nil, nil end
