@@ -3,13 +3,14 @@
 ---| 'V'
 ---| '\22'
 
+local fn = vim.fn
 local M = {}
 
 ---@return string
-M.cword = function() return vim.fn.expand('<cword>') end
+M.cword = function() return fn.expand('<cword>') end
 
 ---@return string
-M.cWORD = function() return vim.fn.expand('<cWORD>') end
+M.cWORD = function() return fn.expand('<cWORD>') end
 
 ---@param srow integer  1-based
 ---@param scol integer  0-based
@@ -18,7 +19,11 @@ M.cWORD = function() return vim.fn.expand('<cWORD>') end
 ---@param mode translate.SourceMode
 ---@return string[]
 M.range = function(srow, scol, erow, ecol, mode)
-  return vim.fn.getregion({ 0, srow, scol + 1, 0 }, { 0, erow, ecol + 1, 0 }, { type = mode })
+  return fn.getregion({ 0, srow, scol + 1, 0 }, { 0, erow, ecol + 1, 0 }, {
+    type = mode,
+    eol = true,
+    exclusive = vim.o.sel:sub(1, 1) == 'e',
+  })
 end
 
 return M
