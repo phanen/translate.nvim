@@ -4,11 +4,14 @@ local Screen = require('nvim-test.screen')
 h.env()
 
 describe('translate.region', function()
-  before_each(h.clear)
+  local screen
+  before_each(function()
+    h.clear()
+    screen = Screen.new(60, 5)
+    screen:attach({ ext_messages = true })
+  end)
 
   it('target = eol', function()
-    local screen = Screen.new(60, 5)
-    screen:attach({ ext_messages = true })
     h.set_lines({ 'hello world' })
     h.exec_lua(function()
       require('translate').setup()
@@ -30,8 +33,6 @@ describe('translate.region', function()
   end)
 
   it('target = inline', function()
-    local screen = Screen.new(60, 5)
-    screen:attach({ ext_messages = true })
     h.set_lines({ 'hello world' })
     h.exec_lua(function()
       require('translate').setup({ target = 'inline' })
@@ -53,8 +54,6 @@ describe('translate.region', function()
   end)
 
   it('target = replace', function()
-    local screen = Screen.new(60, 5)
-    screen:attach({ ext_messages = true })
     h.set_lines({ 'hello world' })
     h.exec_lua(function()
       require('translate').setup({ target = 'replace' })
@@ -87,11 +86,14 @@ describe('translate.region', function()
 end)
 
 describe('translate.immer', function()
-  before_each(h.clear)
+  local screen
+  before_each(function()
+    h.clear()
+    screen = Screen.new(60, 5)
+    screen:attach({ ext_messages = true })
+  end)
 
   it('target = eol', function()
-    local screen = Screen.new(60, 5)
-    screen:attach({ ext_messages = true })
     h.set_lines({ '-- a lua comment', 'local x = 1' })
     h.exec_lua(function()
       vim.bo[0].filetype = 'lua'
@@ -115,8 +117,6 @@ describe('translate.immer', function()
   end)
 
   it('target = below', function()
-    local screen = Screen.new(60, 5)
-    screen:attach({ ext_messages = true })
     h.set_lines({ '-- a comment' })
     screen:expect([[
       ^-- a comment                                                |
