@@ -14,12 +14,12 @@
 ---@field systemPrompt string?
 
 ---@class translate.Config
----@field target_lang string
----@field source_lang string
----@field target translate.Target
----@field http_timeout integer
----@field api translate.ApiType?  -- backend; default 'google'
----@field creds translate.Creds?  -- credentials for the selected backend
+---@field target_lang string?
+---@field source_lang string?
+---@field target translate.Target?
+---@field http_timeout integer?
+---@field api translate.ApiType?
+---@field creds translate.Creds?
 
 local M = {}
 
