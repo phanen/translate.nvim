@@ -2,6 +2,7 @@
 ---@field nodes table<string, string>  -- range key -> text
 ---@field timer uv.uv_timer_t?
 ---@field debounce_ms integer
+---@field target string  -- 'eol' | 'below'
 
 local M = {}
 
@@ -14,7 +15,9 @@ M.enable = function(buf, opts)
   buf = buf or 0
   M.disable(buf)
   local debounce_ms = (opts and opts.debounce_ms) or 400
-  M.state[buf] = { nodes = {}, timer = nil, debounce_ms = debounce_ms }
+  local t = require('translate')
+  local target = (t.config and t.config.target) or 'eol'
+  M.state[buf] = { nodes = {}, timer = nil, debounce_ms = debounce_ms, target = target }
 
   local function on_change()
     local s = M.state[buf]
@@ -66,28 +69,39 @@ M.resync = function(buf)
           api[k] = v
         end
       end
+      if api.apiType == 'microsoft' then api.useBatchFetch = true end
+      local to_translate = extract.strip_prefix(new_texts)
       local http = require('translate.http')
       local trans = require('translate.trans')
       local chunker = require('translate.chunker')
       local render = require('translate.render')
-      render.extmark_clear(buf, 'eol')
-      if api.apiType == 'microsoft' then api.useBatchFetch = true end
-      local to_translate = extract.strip_prefix(new_texts)
+      local target = s.target
+      render.extmark_clear(buf, target)
+      local is_eol = target == 'eol'
       trans.handle_async(
         api,
         to_translate,
         { batchSize = 1 },
         function(results)
           ---@cast results string[]
-          local aligned = chunker.to_eol(results, new_ranges)
-          render.extmark_eol(buf, aligned.items, aligned.ranges)
+          local aligned = is_eol and chunker.to_eol(results, new_ranges)
+            or chunker.to_below(results, new_ranges)
+          if is_eol then
+            render.extmark_eol(buf, aligned.items, aligned.ranges)
+          else
+            render.extmark_below(buf, aligned.items, aligned.ranges)
+          end
         end,
         http.fetch_async,
         function(orig, translation, _)
           local r = new_ranges[orig]
           if r then
             local clean = translation:gsub('%z', ''):gsub('[\r\n]+', ' ')
-            render.extmark_eol(buf, { clean }, { r }, false)
+            if is_eol then
+              render.extmark_eol(buf, { clean }, { r }, false)
+            else
+              render.extmark_below(buf, { clean }, { r }, false)
+            end
           end
         end
       )
@@ -110,7 +124,7 @@ M.disable = function(buf)
     s.timer:stop()
     s.timer:close()
   end
-  require('translate.render').extmark_clear(buf, 'eol')
+  require('translate.render').extmark_clear(buf, s.target)
   M.state[buf] = nil
 end
 

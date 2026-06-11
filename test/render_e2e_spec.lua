@@ -120,4 +120,23 @@ describe('translate.immer (visible behavior)', function()
       ~                                                           |
     ]])
   end)
+
+  it('immer resync places extmarks in below namespace when target = below', function()
+    local marks = h.exec_lua(function()
+      require('translate').setup({ target = 'below' })
+      require('translate.http').set_transport(
+        function(_, cb)
+          cb(200, vim.json.encode({ sentences = { { trans = '注释' } }, src = 'en' }))
+        end
+      )
+      vim.api.nvim_buf_set_lines(0, 0, -1, false, { '-- a comment' })
+      vim.bo.filetype = 'lua'
+      require('translate').immer.enable(0)
+      require('translate').immer.resync(0)
+      local ns = require('translate.ns').below
+      return vim.api.nvim_buf_get_extmarks(0, ns, 0, -1, { details = true })
+    end)
+    h.eq(1, #marks)
+    h.eq({ { '注释', 'TranslateTrans' } }, marks[1][4].virt_lines[1])
+  end)
 end)
