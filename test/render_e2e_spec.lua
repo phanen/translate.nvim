@@ -4,11 +4,11 @@ local Screen = require('nvim-test.screen')
 h.env()
 
 describe('translate.region', function()
-  local screen ---@type test.screen
+  local screen --- @type test.screen
   before_each(function()
     h.clear()
     screen = Screen.new(60, 5)
-    screen:attach({ ext_messages = true, ext_linegrid = true })
+    screen:attach({ ext_messages = true })
   end)
 
   it('target = eol', function()
@@ -86,11 +86,11 @@ describe('translate.region', function()
 end)
 
 describe('translate.immer', function()
-  local screen ---@type test.screen
+  local screen --- @type test.screen
   before_each(function()
     h.clear()
     screen = Screen.new(60, 5)
-    screen:attach({ ext_messages = true, ext_linegrid = true })
+    screen:attach({ ext_messages = true })
   end)
 
   it('target = eol', function()
