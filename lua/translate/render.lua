@@ -88,14 +88,14 @@ M.extmark_replace = function(buf, items, ranges, clear)
     local r = ranges[i]
     local clean = item:gsub('%z', ''):gsub('[\r\n]+', ' ')
     if r then
-      local hl = ''
+      local hl = 'Comment'
       local ok, pos = pcall(vim.inspect_pos, buf, r.srow, r.scol)
       if ok then
         if pos and pos.treesitter and #pos.treesitter > 0 then
-          hl = pos.treesitter[#pos.treesitter].hl_group or hl
+          hl = pos.treesitter[1].hl_group or hl
         end
         if hl == '' and pos and pos.syntax and #pos.syntax > 0 then
-          hl = pos.syntax[#pos.syntax].hl_group or hl
+          hl = pos.syntax[1].hl_group or hl
         end
       end
       local w = vim.fn.strdisplaywidth(clean)
