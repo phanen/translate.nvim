@@ -129,6 +129,12 @@ describe('translate.immer', function()
       require('translate').immer.enable(0)
       require('translate').immer.resync(0)
     end)
-    screen:expect({ any = '注释' })
+    screen:expect([[
+      ^-- a comment                                                |
+      注释                                                        |
+      ~                                                           |
+      ~                                                           |
+      ~                                                           |
+    ]])
   end)
 end)
