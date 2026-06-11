@@ -19,9 +19,10 @@ end
 ---@param buf integer
 ---@param items string[]
 ---@param ranges translate.Range[]
-M.extmark_eol = function(buf, items, ranges)
+---@param clear? boolean  -- default true, false to append without clearing
+M.extmark_eol = function(buf, items, ranges, clear)
   local ns = require('translate.ns').eol
-  vim.api.nvim_buf_clear_namespace(buf, ns, 0, -1)
+  if clear ~= false then vim.api.nvim_buf_clear_namespace(buf, ns, 0, -1) end
   for i, item in ipairs(items) do
     local r = ranges[i]
     local clean = item:gsub('%z', ''):gsub('[\r\n]+', ' ')

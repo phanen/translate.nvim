@@ -9,7 +9,8 @@ local M = {}
 ---@param opts translate.BatchOpts?
 ---@param cb fun(results: string[]?)
 ---@param http_fetch fun(opts: translate.HttpOpts, cb: fun(status: integer, body: string))
-M.handle_async = function(api, segments, opts, cb, http_fetch)
+---@param on_segment? fun(results: string[])
+M.handle_async = function(api, segments, opts, cb, http_fetch, on_segment)
   local batch = require('translate.batch')
   local req = require('translate.req')
   local parse = require('translate.parse')
@@ -72,6 +73,7 @@ M.handle_async = function(api, segments, opts, cb, http_fetch)
         end
       end
       pos = pos + #chunk
+      if on_segment then on_segment(results) end
       run_chunk(idx + 1)
     end)
   end
