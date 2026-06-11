@@ -95,7 +95,7 @@ M.extmark_replace = function(buf, items, ranges, clear)
       vim.api.nvim_buf_set_extmark(buf, ns, r.srow, r.scol, {
         end_row = r.erow,
         end_col = r.ecol,
-        virt_text = { { padded, 'TranslateTrans' } },
+        virt_text = { { padded } },
         virt_text_pos = 'overlay',
         virt_text_hide = false,
         hl_mode = 'replace',
