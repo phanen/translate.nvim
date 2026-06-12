@@ -7,7 +7,7 @@ describe('translate.immer', function()
 
   it('places extmarks after resync on a lua buffer', function()
     local count = h.exec_lua(function()
-      require('translate').setup()
+      require('translate').setup({ api = 'google' })
       require('translate.http').set_transport(
         function(_, cb)
           cb(200, vim.json.encode({ sentences = { { trans = '你好' } }, src = 'en' }))
@@ -26,7 +26,7 @@ describe('translate.immer', function()
   it('skips unchanged nodes on second resync', function()
     local call_count = h.exec_lua(function()
       _G._t_calls = 0
-      require('translate').setup()
+      require('translate').setup({ api = 'google' })
       require('translate.http').set_transport(function(_, cb)
         _G._t_calls = _G._t_calls + 1
         cb(200, vim.json.encode({ sentences = { { trans = '你好' } }, src = 'en' }))
@@ -44,7 +44,7 @@ describe('translate.immer', function()
   it('retranslates when text changes', function()
     local call_count = h.exec_lua(function()
       _G._t_calls = 0
-      require('translate').setup()
+      require('translate').setup({ api = 'google' })
       require('translate.http').set_transport(function(_, cb)
         _G._t_calls = _G._t_calls + 1
         cb(200, vim.json.encode({ sentences = { { trans = '你好' } }, src = 'en' }))
@@ -62,7 +62,7 @@ describe('translate.immer', function()
 
   it('disable clears extmarks and state', function()
     local marks = h.exec_lua(function()
-      require('translate').setup()
+      require('translate').setup({ api = 'google' })
       require('translate.http').set_transport(
         function(_, cb)
           cb(200, vim.json.encode({ sentences = { { trans = '你好' } }, src = 'en' }))
@@ -81,7 +81,7 @@ describe('translate.immer', function()
 
   it('placeks exactly one extmark per comment line (no duplicates)', function()
     local marks = h.exec_lua(function()
-      require('translate').setup()
+      require('translate').setup({ api = 'google' })
       require('translate.http').set_transport(
         function(_, cb)
           cb(200, vim.json.encode({ sentences = { { trans = '注释' } }, src = 'en' }))

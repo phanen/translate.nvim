@@ -41,7 +41,7 @@ M.region = function()
     end
   end
 
-  local target = M.config.target
+  local target = (M.config.region and M.config.region.target) or M.config.target or 'echo'
   trans.handle_async(api_cfg, lines, nil, function(r)
     ---@cast r string[]
     ---@cast ranges translate.Range[]

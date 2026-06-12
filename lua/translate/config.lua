@@ -13,6 +13,9 @@
 ---@field model string?
 ---@field systemPrompt string?
 
+---@class translate.TargetConfig
+---@field target translate.Target?
+
 ---@class translate.Config
 ---@field target_lang string?
 ---@field source_lang string?
@@ -20,6 +23,8 @@
 ---@field http_timeout integer?
 ---@field api translate.ApiType?
 ---@field creds translate.Creds?
+---@field immer translate.TargetConfig?
+---@field region translate.TargetConfig?
 
 local M = {}
 
@@ -30,8 +35,10 @@ M.defaults = function()
     source_lang = 'auto',
     target = 'eol',
     http_timeout = 30000,
-    api = 'google',
+    api = 'microsoft',
     creds = nil,
+    immer = nil,
+    region = nil,
   }
 end
 
@@ -71,6 +78,12 @@ M.validate = function(cfg)
     local valid_apis =
       { google = true, microsoft = true, openai = true, mymemory = true, baidu = true }
     assert(valid_apis[cfg.api] == true, ('invalid api: %s'):format(tostring(cfg.api)))
+  end
+  if cfg.immer and cfg.immer.target ~= nil then
+    assert(valid_targets[cfg.immer.target] == true, ('invalid immer target: %s'):format(tostring(cfg.immer.target)))
+  end
+  if cfg.region and cfg.region.target ~= nil then
+    assert(valid_targets[cfg.region.target] == true, ('invalid region target: %s'):format(tostring(cfg.region.target)))
   end
 end
 
