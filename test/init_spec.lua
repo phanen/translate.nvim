@@ -32,4 +32,27 @@ describe('translate (init)', function()
       h.matches('invalid target', err)
     end)
   end)
+
+  describe('clear', function()
+    it('clears extmarks across all render namespaces', function()
+      h.exec_lua(function()
+        require('translate').setup()
+        local render = require('translate.render')
+        render.extmark_eol(0, { 'a' }, { { srow = 0, scol = 0, erow = 0, ecol = 0 } })
+        render.extmark_below(0, { 'b' }, { { srow = 0, scol = 0, erow = 0, ecol = 0 } })
+        render.extmark_replace(0, { 'c' }, { { srow = 0, scol = 0, erow = 0, ecol = 0 } })
+        render.extmark_inline(0, { 'd' }, { { srow = 0, scol = 0, erow = 0, ecol = 0 } })
+        require('translate').clear(0)
+      end)
+      local total = h.exec_lua(function()
+        local ns = require('translate.ns')
+        local n = 0
+        for _, t in ipairs({ ns.eol, ns.below, ns.replace, ns.inline }) do
+          n = n + #vim.api.nvim_buf_get_extmarks(0, t, 0, -1, {})
+        end
+        return n
+      end)
+      h.eq(0, total)
+    end)
+  end)
 end)

@@ -19,6 +19,15 @@ M.immer = {
   resync = function(buf) return require('translate.immer').resync(buf) end,
 }
 
+---@param buf integer?
+M.clear = function(buf)
+  local render = require('translate.render')
+  buf = (buf and buf ~= 0) and buf or vim.api.nvim_get_current_buf()
+  for _, t in ipairs({ 'eol', 'below', 'inline', 'replace' }) do
+    render.extmark_clear(buf, t)
+  end
+end
+
 M.region = function()
   if not M.config then return end
   local source = require('translate.source')
