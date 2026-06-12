@@ -3,7 +3,7 @@ vim.g.loaded_translate = 1
 
 vim.api.nvim_create_user_command(
   'Translate',
-  function() require('translate').region() end,
+  function(args) require('translate').region(args.range > 0) end,
   { range = true, desc = 'translate.nvim: translate selection or word' }
 )
 

@@ -28,22 +28,25 @@ M.range = function(srow, scol, erow, ecol, mode)
   })
 end
 
+---@param use_range? boolean  -- true when invoked with a range (:'<,'>)
 ---@return string[]?, translate.Range[]?
-M.collect = function()
+M.collect = function(use_range)
   local mode = api.nvim_get_mode().mode
   local s, v, regtype
-  local lt = fn.getpos("'<")
-  local gt = fn.getpos("'>")
-  local has_marks = lt[2] ~= 0 and gt[2] ~= 0
   if mode:match('[vV\22]') then
     s = fn.getpos('.')
     v = fn.getpos('v')
     regtype = mode == 'V' and 'V' or (mode == '\22' and '\22' or 'v')
-  elseif has_marks then
-    s = lt
-    v = gt
-    regtype = fn.visualmode()
-  else
+  elseif use_range then
+    local lt = fn.getpos("'<")
+    local gt = fn.getpos("'>")
+    if lt[2] ~= 0 and gt[2] ~= 0 then
+      s = lt
+      v = gt
+      regtype = fn.visualmode()
+    end
+  end
+  if not s then
     local word = M.cword()
     if word == '' then return nil, nil end
     local cursor = api.nvim_win_get_cursor(0)

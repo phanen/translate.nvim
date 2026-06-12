@@ -28,7 +28,8 @@ M.clear = function(buf)
   end
 end
 
-M.region = function()
+---@param use_range? boolean
+M.region = function(use_range)
   if not M.config then return end
   local source = require('translate.source')
   local trans = require('translate.trans')
@@ -37,7 +38,7 @@ M.region = function()
   local chunker = require('translate.chunker')
   local http = require('translate.http')
 
-  local lines, ranges = source.collect()
+  local lines, ranges = source.collect(use_range)
   if not lines or #lines == 0 then return end
 
   local api_cfg = api.default_api(M.config.api or 'google')
