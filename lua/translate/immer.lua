@@ -16,7 +16,9 @@ M.enable = function(buf, opts)
   M.disable(buf)
   local debounce_ms = (opts and opts.debounce_ms) or 400
   local t = require('translate')
-  local target = (t.config and t.config.immer and t.config.immer.target) or (t.config and t.config.target) or 'inline'
+  local target = (t.config and t.config.immer and t.config.immer.target)
+    or (t.config and t.config.target)
+    or 'inline'
   M.state[buf] = { nodes = {}, timer = nil, debounce_ms = debounce_ms, target = target }
 
   local function on_change()

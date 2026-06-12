@@ -3,9 +3,7 @@
 
 local out = {}
 
-local function put(s)
-  out[#out + 1] = s or ''
-end
+local function put(s) out[#out + 1] = s or '' end
 
 put('*translate.txt*  Translation plugin for Neovim')
 put('')

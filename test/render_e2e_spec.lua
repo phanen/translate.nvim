@@ -98,7 +98,7 @@ describe('translate.immer', function()
     h.exec_lua(function()
       vim.bo[0].filetype = 'lua'
       vim.api.nvim_win_set_cursor(0, { 1, 0 })
-      require('translate').setup({ api = 'google' })      -- immer.eol
+      require('translate').setup({ api = 'google' }) -- immer.eol
       require('translate.http').set_transport(
         function(_, cb)
           cb(200, vim.json.encode({ sentences = { { trans = '注释' } }, src = 'en' }))

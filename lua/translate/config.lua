@@ -80,10 +80,16 @@ M.validate = function(cfg)
     assert(valid_apis[cfg.api] == true, ('invalid api: %s'):format(tostring(cfg.api)))
   end
   if cfg.immer and cfg.immer.target ~= nil then
-    assert(valid_targets[cfg.immer.target] == true, ('invalid immer target: %s'):format(tostring(cfg.immer.target)))
+    assert(
+      valid_targets[cfg.immer.target] == true,
+      ('invalid immer target: %s'):format(tostring(cfg.immer.target))
+    )
   end
   if cfg.region and cfg.region.target ~= nil then
-    assert(valid_targets[cfg.region.target] == true, ('invalid region target: %s'):format(tostring(cfg.region.target)))
+    assert(
+      valid_targets[cfg.region.target] == true,
+      ('invalid region target: %s'):format(tostring(cfg.region.target))
+    )
   end
 end
 
