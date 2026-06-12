@@ -49,9 +49,10 @@ M.region = function()
       api_cfg[k] = v
     end
   end
+  if api_cfg.apiType == 'microsoft' then api_cfg.useBatchFetch = true end
 
   local target = (M.config.region and M.config.region.target) or M.config.target or 'echo'
-  trans.handle_async(api_cfg, lines, nil, function(r)
+  trans.handle_async(api_cfg, lines, { batchSize = 1 }, function(r)
     ---@cast r string[]
     ---@cast ranges translate.Range[]
     if target == 'echo' then
