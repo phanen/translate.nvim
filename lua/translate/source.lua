@@ -44,6 +44,7 @@ M.collect = function(use_range)
       s = lt
       v = gt
       regtype = fn.visualmode()
+      if regtype == '' then regtype = 'v' end
     end
   end
   if not s then
