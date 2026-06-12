@@ -35,14 +35,12 @@ M.collect = function()
     local s = fn.getpos('.')
     local v = fn.getpos('v')
     local regtype = mode == 'V' and 'V' or (mode == '\22' and '\22' or 'v')
-    local srow, scol, vrow, vcol = s[2], s[3] - 1, v[2], v[3] - 1
-    local srow0 = math.min(srow, vrow)
-    local scol0 = srow0 == srow and scol or (srow0 == vrow and vcol or 0)
-    local erow = math.max(srow, vrow)
-    local ecol = erow == srow and scol or (erow == vrow and vcol or 0)
-    local raw = M.range(srow0, scol0, erow, ecol, regtype)
+    local raw =
+      fn.getregion(s, v, { type = regtype, eol = true, exclusive = vim.o.sel:sub(1, 1) == 'e' })
     local full = table.concat(raw, '\n')
-    return { full }, { { srow = srow0, scol = scol0, erow = erow, ecol = ecol } }
+    local srow0 = math.min(s[2], v[2]) - 1
+    local erow = math.max(s[2], v[2]) - 1
+    return { full }, { { srow = srow0, scol = 0, erow = erow, ecol = 0 } }
   else
     local word = M.cword()
     if word == '' then return nil, nil end
