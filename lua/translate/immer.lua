@@ -9,10 +9,10 @@ local M = {}
 ---@type table<integer, translate.ImmerState?>
 M.state = {}
 
----@param buf integer
+---@param buf integer?
 ---@param opts? { debounce_ms?: integer }
 M.enable = function(buf, opts)
-  buf = buf or 0
+  buf = (buf and buf ~= 0) and buf or vim.api.nvim_get_current_buf()
   M.disable(buf)
   local debounce_ms = (opts and opts.debounce_ms) or 400
   local t = require('translate')
@@ -38,9 +38,9 @@ M.enable = function(buf, opts)
   vim.schedule(function() M.resync(buf) end)
 end
 
----@param buf integer
+---@param buf integer?
 M.resync = function(buf)
-  buf = buf or 0
+  buf = (buf and buf ~= 0) and buf or vim.api.nvim_get_current_buf()
   local s = M.state[buf]
   if not s then return end
   local ft = vim.bo[buf].filetype
@@ -122,9 +122,9 @@ M.resync = function(buf)
   end
 end
 
----@param buf integer
+---@param buf integer?
 M.disable = function(buf)
-  buf = buf or 0
+  buf = (buf and buf ~= 0) and buf or vim.api.nvim_get_current_buf()
   local s = M.state[buf]
   if not s then return end
   if s.timer then
