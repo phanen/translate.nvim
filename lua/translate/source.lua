@@ -37,10 +37,18 @@ M.collect = function()
     local regtype = mode == 'V' and 'V' or (mode == '\22' and '\22' or 'v')
     local raw =
       fn.getregion(s, v, { type = regtype, eol = true, exclusive = vim.o.sel:sub(1, 1) == 'e' })
-    local full = table.concat(raw, '\n')
     local srow0 = math.min(s[2], v[2]) - 1
     local erow = math.max(s[2], v[2]) - 1
-    return { full }, { { srow = srow0, scol = 0, erow = erow, ecol = 0 } }
+    if regtype == 'V' or regtype == '\22' then
+      local ranges = {}
+      for i, line in ipairs(raw) do
+        ranges[i] = { srow = srow0 + i - 1, scol = 0, erow = srow0 + i - 1, ecol = 0 }
+      end
+      return raw, ranges
+    else
+      local full = table.concat(raw, '\n')
+      return { full }, { { srow = srow0, scol = 0, erow = erow, ecol = 0 } }
+    end
   else
     local word = M.cword()
     if word == '' then return nil, nil end
