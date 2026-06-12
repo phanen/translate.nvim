@@ -52,8 +52,19 @@ M.resync = function(buf)
   for _, n in ipairs(nodes) do
     local key = ('%d:%d-%d:%d'):format(n.range.srow, n.range.scol, n.range.erow, n.range.ecol)
     if s.nodes[key] ~= n.text then
-      new_ranges[#new_ranges + 1] = n.range
-      new_texts[#new_texts + 1] = n.text
+      local nlines = n.range.erow - n.range.srow + 1
+      if nlines > 1 then
+        local lines = vim.split(n.text, '\n')
+        for j, line in ipairs(lines) do
+          local row = n.range.srow + j - 1
+          local scol = (j == 1) and n.range.scol or 0
+          new_ranges[#new_ranges + 1] = { srow = row, scol = scol, erow = row, ecol = 0 }
+          new_texts[#new_texts + 1] = line
+        end
+      else
+        new_ranges[#new_ranges + 1] = n.range
+        new_texts[#new_texts + 1] = n.text
+      end
     end
   end
 
